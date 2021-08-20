@@ -1,0 +1,163 @@
+header{
+    background-color: rgb(37, 209, 157);
+    position: fixed;
+    top: 0;
+    justify-content: space-between;
+    height: 3rem;
+    width: 100%;
+    display: flex;
+    margin: 0;
+}
+
+#greede{
+    color: white;
+    font-size: 2rem;
+}
+
+.menu-btn {
+    /* position: fixed; */
+    right: 0;
+    top: 0;
+    display: flex;
+    height: 3rem;
+    width: 60px;
+    justify-content: center;
+    align-items: center;
+    z-index: 90;
+    background-color: rgb(37, 209, 157);
+}
+.menu-btn span,
+.menu-btn span:before,
+.menu-btn span:after {
+    content: '';
+    display: block;
+    height: 3px;
+    width: 25px;
+    border-radius: 3px;
+    background-color: #ffffff;
+    position: absolute;
+}
+.menu-btn span:before {
+    bottom: 8px;
+}
+.menu-btn span:after {
+    top: 8px;
+}
+#menu-btn-check:checked ~ .menu-btn span {
+    background-color: rgba(255, 255, 255, 0);/*メニューオープン時は真ん中の線を透明にする*/
+}
+#menu-btn-check:checked ~ .menu-btn span::before {
+    bottom: 0;
+    transform: rotate(45deg);
+}
+#menu-btn-check:checked ~ .menu-btn span::after {
+    top: 0;
+    transform: rotate(-45deg);
+}
+.menu-btn-check {
+    display: none;
+}
+
+.menu-content {
+    height: 100%;
+    margin-top: 3rem;
+    padding: 4rem 5% 2rem 5%;
+    position: fixed;
+    top: 0;
+    left: 100%;
+    z-index: 80;
+    background-color: rgba(0, 0, 0, 0.4);
+    transition: all 0.5s;
+    color: white;
+    overflow-y: scroll;
+}
+
+.heading{
+    border-bottom: 2px solid rgb(37, 209, 157);
+    padding-bottom: 0.5rem;
+}
+
+.strong{
+    color: rgb(37, 209, 157);
+}
+
+.code{
+    background-color: rgb(17, 17, 17);
+    color: rgb(37, 209, 157);
+}
+
+@media screen and (min-width: 801px) {
+    .menu-contetn{
+        width: 60%;
+    }
+    #menu-btn-check:checked ~ .menu-content {
+        left: 40%;
+    }
+    #menu-top{
+        margin-left: 40%;
+        position: fixed;
+    }
+}
+
+@media screen and (max-width: 800px) {
+    .menu-content{
+        width: 100%;
+    }
+    #menu-btn-check:checked ~ .menu-content {
+        left: 0;
+    }    
+    #menu-top{
+        margin-left: 80%;
+        position: fixed;
+    }
+}
+
+
+/* ----------------join_group ---------------- */
+#join_group{
+    display: table;
+    width: 10rem;
+}
+
+#join_group a{
+    color: white;
+    text-decoration: none;
+    border-radius: 2rem;
+    display: table-cell;
+    vertical-align: middle;
+    text-align: center;
+    transition: all 0.5s;
+}
+
+#join_group a:hover{
+    background-color: rgb(31, 177, 51);
+    transition: all 0.5s;
+}
+
+/* ----------------- user name etc ----------------- */
+#showuser{
+    display: table;
+    margin-right: 1rem;
+}
+#username{
+    color: white;
+    display: table-cell;
+    vertical-align: middle;
+}
+
+#show_group_name{
+    display: table;
+    margin-right:1rem;
+}
+
+#group_name{
+    color: white;
+    display: table-cell;
+    vertical-align: middle;
+}
+
+#joined_group{
+    color: white;
+    display: table-cell;
+    vertical-align: middle;
+}

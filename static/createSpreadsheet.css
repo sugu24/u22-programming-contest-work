@@ -1,0 +1,38 @@
+body{
+    width: 100%;
+}
+
+.container{
+    margin: 4rem auto 1rem auto;
+}
+
+.form{
+    display: flex;
+    justify-content: space-around;
+    flex-wrap: wrap;
+    margin: 1rem auto auto auto;
+    text-align: center;
+    border: none;
+}
+
+.btn{
+    width: 100%;
+    background-color: rgb(37, 209, 157);;
+    border-radius: 3px;
+    box-shadow: 1px 1px 1px seagreen, -1px -1px 1px seagreen;
+    margin-left: 1rem;
+    font-size: 1vw;
+    color: white;
+    margin-top: auto;
+}
+.btn:hover {
+    left: 0;
+    top: 0;
+    box-shadow: 0 0 4px white, -2px -2px 4px white;
+    color: white;
+  }
+
+  #table{
+      margin-top: 1rem;
+      width: 100%;
+  }

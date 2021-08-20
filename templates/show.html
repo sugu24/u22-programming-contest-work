@@ -1,0 +1,31 @@
+{% extends 'base.html' %}
+
+{% load static %}
+{% block header %}
+<link rel="stylesheet" type='text/css' href="{% static 'header.css' %}">
+<link rel="stylesheet" type='text/css' href="{% static 'show.css' %}">
+{% endblock header %}
+
+
+{% block content %}
+
+<header>
+    <div id="greede">greede</div>
+    <div id="showuser"><div id="username">管理者名 : <span id="username-span">{{ user.username }}</span></div></div></div>
+    <div id="show_group_name"><div id="group_name">グループ名 : <span id="group-name-span">{{ group_name }}</span></div></div>
+</header>
+
+<div class="container">
+    <div class="container-child">
+        <div id="question-exp">問題文</div>
+        <textarea readonly id="question">{{ question }}</textarea>
+    <div class="container-child">
+        <div id="pie-exp">正解率 （上限80%で表示）</div>
+        <div id="pie"><span id="parsent"></span>%</div>
+    </div>
+</div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
+<script src="{% static 'show.js' %}"></script>
+
+{% endblock content %}

@@ -1,0 +1,37 @@
+{% extends 'base.html' %}
+
+{% load static %}
+{% block header %}
+<link rel="stylesheet" type='text/css' href="{% static 'header.css' %}">
+<link rel="stylesheet" type='text/css' href="{% static 'login.css' %}">
+{% endblock header %}
+
+
+{% block content %}
+
+<header>
+    <div id="greede">greede</div>
+</header>
+
+<div class="form-join-group">
+    <form method="POST">{% csrf_token %}
+        {% if error %}
+        <div class="error">{{ error }}</div>
+        {% endif %}
+        <div class="form-floating">
+            <input type="text" class="form-control" id="userNameInput" placeholder="username" name="username_data" required>
+            <label for="userNameLabel">username</label>
+        </div>
+        <div class="form-floating">
+            <input type="password" class="form-control" id="passwordInput" placeholder="password" name="password_data" required>
+            <label for="passwordLabel">password</label>
+        </div>
+        <button class="w-100 btn btn-lg btn-primary" type="submit" name='login'>login</button>
+    </form>
+    <form method="POST">{% csrf_token %}
+        <button class="w-100 btn btn-lg btn-primary signup" type="submit" name='signup'>アカウントを持っていない場合</button>
+    </form>
+
+</div>
+
+{% endblock content %}

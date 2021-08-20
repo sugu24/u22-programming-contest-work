@@ -1,0 +1,43 @@
+{% extends 'base.html' %}
+
+{% load static %}
+{% block header %}
+<link rel="stylesheet" type='text/css' href="{% static 'header.css' %}">
+<link rel="stylesheet" type='text/css' href="{% static 'createGroup.css' %}">
+{% endblock header %}
+
+
+{% block content %}
+
+<header>
+    <div id="greede">greede</div>
+    <div id="showuser"><div id="username">ユーザー名 : {{ user.username }}</div></div>
+</header>
+
+<div class="form-join-group">
+    <h1 class="h3 mb-3 fw-normal">グループの作成または選択</h1>
+    <form method="POST">{% csrf_token %}
+        {% if error %}
+        <div class="error">{{ error }}</div>
+        {% endif %}
+        <div class="form-floating">
+            <input type="text" class="form-control" id="groupNameInput" placeholder="groupname" name="group_name_data" required>
+            <label for="groupNameLabel">グループ名</label>
+        </div>
+        <div class="form-floating">
+            <input type="password" class="form-control" id="adminPasswordInput" placeholder="groupname" name="group_password_data" required>
+            <label for="adminPasswordLabel">管理画面パスワード</label>
+        </div>
+        <div class="form-floating">
+            <input type="password" class="form-control" id="groupPasswordInput" placeholder="Password" name="screen_password_data" required>
+            <label for="groupPasswordLabel">グループパスワード</label>
+        </div>
+        <button class="w-100 btn btn-lg btn-primary" type="submit" name="create_group">グループを作成する</button>
+    </form>
+    <form method="POST">{% csrf_token %}
+        <button class="w-100 btn btn-lg btn-primary" type="submit" name="created_group">以前作成したグループを選択</button>
+        <button class="w-100 btn btn-lg btn-primary" type="submit" name="login">他アカウントでログイン</button>
+    </form>
+</div>
+
+{% endblock content %}

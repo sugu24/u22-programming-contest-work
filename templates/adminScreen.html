@@ -1,0 +1,88 @@
+{% extends 'base.html' %}
+
+{% load static %}
+{% block header %}
+<link rel="stylesheet" type='text/css' href="{% static 'header.css' %}">
+<link rel="stylesheet" type='text/css' href="{% static 'adminScreen.css' %}">
+{% endblock header %}
+
+
+{% block content %}
+{% if user.is_authenticated %}
+<header>
+    <div id="greede">greede</div>
+    <div id="showuser"><div id="username">管理者名 : <span id="username-span">{{ user.username }}</span></div></div></div>
+</header>
+
+<div class="parent-container" id="parent">
+    <div class="group_infomation">
+        <div id="group_name_">グループ名 : <span id="group_name_span">{{ group_name }}</span></div>
+        <div id="group_password">グループパスワード : <span id="group_password_span">{{ join_password }}</span></div>
+        <div id="screen_password">結果画面パスワード : <span id="screen_password_span">{{ screen_password }}</span></div>
+    </div>
+    <div class="form">
+        <form class="row1" action="" method="POST">{% csrf_token %}
+            <div class="function">
+                <div><button class="btn" type="submit" id="dissolution" name="dissolution">解散</button></div>
+            </div>
+        </form>
+        <form id="ajax-submit-updata" class="row1" action='' method="POST" >{% csrf_token %}
+            <div class="function">
+                <div><button class="btn" type="submit" id="updata-question" name="updata">問題の更新</button></div>
+            </div>
+        </form>
+        <form id="ajax-submit-next-question" class="row1" action='' method="POST" >{% csrf_token %}
+            <div class="function">
+                <div><button class="btn" type="submit" id="next-question" name="next-question">次の問題へ</button></div>
+            </div>
+        </form>
+        <form id="ajax-submit-select-question">
+            <div id="questions">
+                <div id="focus_question_text">現在の問題 : {{ focus_question }}</div>
+                <div>
+                    <select name="select-question" id="created-question" size=1>
+                        {% for question in created_questions %}
+                        <option value="{{ question.id }} . {{ question.title }}">{{ question.id }} . {{ question.title }}</option>
+                        {% endfor %}
+                    </select>             
+                </div>
+                <div class="function">
+                    <div><button class="btn" type="submit" id="select-question" name="select-question">左の問題にする</button></div>
+                </div>
+            </div>
+        </form>
+    </div>
+
+    <div class="container">
+        <div class="question-contents">
+            <div class="content-block">
+                <div class="show-title"><p class="show">問題のタイトル</p></div>
+                <textarea id="title" name="question" cols="30" rows="1">{{ title }}</textarea>
+            </div>
+            <div class="content-block">
+                <div class="show-exp-col"><p class="show">問題文</p></div>
+                <textarea id="question" name="question" cols="30" rows="8">{{ question }}</textarea>
+            </div>
+            <div class="content-block">
+                <div class="show-exp-col"><p class="show">回答</p></div>
+                <textarea id="answer" name="answer" cols="30" rows="5">{{ answer }}</textarea>
+            </div>
+        </div>
+        <div class="member-contents">
+            <div class="show-exp-col"><p class="show">参加メンバー</p></div>
+            <div id="join-members" class="members">{% for member in member_list %}{{ member.user.username }}<br>{% endfor %}</div>
+        </div>
+        <div class="ac-member-contents">
+            <div class="show-exp-col"><p class="show">正解メンバー</p></div>
+            <div id="ac-members" class="members"></div>
+            <div hidden id="hidden-ac-members">{{ ac_members }}</div>
+        </div>
+    </div>
+</div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
+<script src="{% static 'adminScreen.js' %}"></script>
+
+{% endif %}
+
+{% endblock content %}

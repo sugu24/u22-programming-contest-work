@@ -1,0 +1,40 @@
+{% extends 'base.html' %}
+
+{% load static %}
+{% block header %}
+<link rel="stylesheet" type='text/css' href="{% static 'header.css' %}">
+<link rel="stylesheet" type='text/css' href="{% static 'select.css' %}">
+{% endblock header %}
+
+
+{% block content %}
+
+<header>
+    <div id="greede">greede</div>
+    <div id="showuser"><div id="username">ログイン名 : <span id="username-span">{{ user.username }}</span></div></div></div>
+</header>
+
+<div class="form">
+    <h3 class="h3 mb-3 fw-normal">用途を選択してください</h1>
+    {% if error %}
+    <div class="error">{{ error }}</div>
+    {% endif %}
+    <form action="" method="POST">{% csrf_token %}
+        <div class="btn-div">
+            <button class="btn" id="btn-to-editor" type="submit" name="editor">コードを書く</button>
+        </div>
+        <div class="btn-div">
+            <button class="btn" id="btn-to-administrator" type="submit" name="administorator">管理者になる</button>
+        </div>
+        <div class="btn-div">
+            <button class="btn" id="btn-to-bystander" type="submit" name="show">結果表示</button>
+        </div>
+        <div class="btn-div">
+            <button class="btn" id="btn-login" type="submit" name="login">ログイン</button>
+        </div>
+        <div class="btn-div">
+            <button class="btn" id="btn-logout" type="submit" name="logout">ログアウト</button>
+        </div>
+    </form>
+</div>
+{% endblock content %}

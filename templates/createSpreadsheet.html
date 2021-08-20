@@ -1,0 +1,59 @@
+{% extends 'base.html' %}
+
+{% load static %}
+{% block header %}
+<link rel="stylesheet" type='text/css' href="{% static 'header.css' %}">
+<link rel="stylesheet" type='text/css' href="{% static 'createSpreadsheet.css' %}">
+{% endblock header %}
+
+
+{% block content %}
+{% if user.is_authenticated %}
+<header>
+    <div id="greede">greede</div>
+    <div id="showuser"><div id="username">管理者名 : <span id="username-span">{{ user.username }}</span></div></div></div>
+    <div id="show_group_name"><div id="group_name">グループ名 : <span id="group-name-span">{{ group_name }}</span></div></div>
+</header>
+
+<div class="container">
+    <form action="" method="POST">{% csrf_token %}
+        <div class="form">
+            <div class="btn-div">
+                <button hidden class="btn" id="download" type="submit" name="download">ダウンロードする</button>
+            </div>
+            <div class="btn-div">
+                <button hidden class="btn" id="undownload" type="submit" name="undownload">ダウンロードしない</button>
+            </div>
+            <div class="btn-div">
+                <button hidden class="btn" id="finish" type="submit" name="finish">終了</button>
+            </div>
+        </div>
+    </form>
+    <div id="table"></div>
+    <div hidden class="questions">
+        <div id="question-number">{{ group_question_count }}</div>
+        {% for question in group_questions %}
+        <div class="question">
+            <div id="question-id">{{ question.pk }}</div>
+            <div id="question-title">{{ question.title }}</div>
+            <div id="question-question">{{ question.question }}</div>
+            <div id="question-answer">{{ question.answer }}</div>
+            <div id="question-ac-member">{{ question.ac_member }}</div>
+            <div id="question-submit-member">{{ question.submit_member }}</div>
+        </div>
+        {% endfor %}
+    </div>
+</div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
+<script src="https://bossanova.uk/jexcel/v4/jexcel.js"></script>
+<script src="https://bossanova.uk/jsuites/v2/jsuites.js"></script>
+
+<link rel="stylesheet" href="https://bossanova.uk/jexcel/v4/jexcel.css" />
+<link rel="stylesheet" href="https://bossanova.uk/jsuites/v2/jsuites.css" />
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
+<script src="{% static 'createSpreadsheet.js' %}"></script>
+
+{% endif %}
+
+{% endblock content %}

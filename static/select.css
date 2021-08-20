@@ -1,0 +1,15 @@
+.form{
+    margin: 4rem auto auto auto;
+    text-align: center;
+    border: none;
+}
+
+.btn{
+    width: 10rem;
+    margin-top: 1rem;
+    background-color:rgb(37, 209, 157);
+}
+
+.error{
+    color: red; 
+}

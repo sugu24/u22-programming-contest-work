@@ -1,0 +1,15 @@
+.form{
+    margin: 4rem auto auto auto;
+    text-align: center;
+    border: none;
+}
+
+.h3{
+    margin-top: 2rem;
+    margin-bottom: 0;
+}
+
+.btn{
+    width: 10rem;
+    background-color:rgb(37, 209, 157);
+}

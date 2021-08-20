@@ -1,0 +1,21 @@
+body{
+    height: 100%;
+}
+
+.form-join-group{
+    margin: 5rem;
+    padding: 5px;
+    z-index: -1;
+}
+
+form{
+    z-index: -10000;
+}
+
+.h3{
+    text-align: center;
+}
+
+.form-floating{
+    margin-bottom: 1rem;
+}

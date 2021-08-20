@@ -1,0 +1,22 @@
+body{
+    width: 100%;
+}
+
+.container{
+    margin: 4rem auto 1rem auto;
+}
+
+.container-child{
+    margin: 1rem;
+}
+
+.container-child > textarea{
+    width: 100%;
+}
+
+#pie{
+    font-size: 10vw;
+    vertical-align: middle;
+    text-align: center;
+    margin-top: 3rem ;
+}

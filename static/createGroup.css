@@ -1,0 +1,29 @@
+body{
+    height: 100%;
+}
+
+.error{
+    color: red; 
+}
+
+.form-join-group{
+    margin: 5rem;
+    padding: 5px;
+    
+}
+
+form{
+    z-index: -10000;
+}
+
+.h3{
+    text-align: center;
+}
+
+.form-floating{
+    margin-bottom: 1rem;
+}
+
+.btn{
+    margin-bottom: 2rem;
+}

@@ -1,0 +1,24 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block header %}
+<link rel="stylesheet" type='text/css' href="{% static 'createdGroup.css' %}">
+<link rel="stylesheet" type='text/css' href="{% static 'header.css' %}">
+{% endblock header %}
+
+{% block content %}
+<header>
+    <div id="greede">greede</div>
+    <div id="showuser"><div id="username">ユーザー名 : {{ user.username }}</div></div>
+</header>
+
+<div class="container">
+    <div class="exp">作成したグループ</div>
+    {% for group in object_list %}
+    <div class="group">
+        <a href="{% url 'adminScreen' group.pk %}" class="btn">{{ group.pk }}.{{ group.group_name }}</a>
+    </div>
+    {% endfor %}
+</div>
+
+{% endblock content %}
