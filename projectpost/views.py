@@ -1,6 +1,4 @@
-from re import sub
 import string, random, subprocess
-from sys import stdout
 import threading
 from channels.layers import get_channel_layer
 from django.shortcuts import render, redirect
@@ -39,14 +37,19 @@ def selectView(request):
 
 
 def editorView(request):
-    def resultProgram(file_name, program):
+    def resultProgram(program, input_data, file_name):
         gd_name = file_name + ".gd"
         ll_name = file_name + ".ll"
+        input_name = file_name + '.txt'
         subprocess.run(['touch', '{}'.format(gd_name)])
         with open('{}'.format(gd_name), 'w') as fp:
             fp.write(program)
         
-        debug = subprocess.Popen(['dcc', '{}'.format(gd_name), '-o', '{}'.format(ll_name)], encoding='utf-8', stderr=subprocess.PIPE)
+        subprocess.run(['touch', '{}'.format(input_name)])
+        with open('{}'.format(input_name), 'w') as fp:
+            fp.write(input_data)
+
+        debug = subprocess.Popen(['dcc', '{}'.format(gd_name), '-o', '{}'.format(ll_name)], encoding='utf-8', stdout=subprocess.PIPE, stderr=subprocess.PIPE)
         timer = threading.Timer(1, debug.kill)
         try:
             timer.start()
@@ -56,38 +59,51 @@ def editorView(request):
             if debug_out is None and debug_error is None:
                 return "error"
         
-        subprocess.run(['rm', '{}'.format(gd_name)])
+        subprocess.Popen(['rm', '{}'.format(gd_name)])
         if len(debug_error) == 0:
-            exec = subprocess.Popen(['lli', '{}'.format(ll_name)], encoding='utf-8', stdout=subprocess.PIPE)
+            exec = subprocess.Popen(['lli', '{}'.format(ll_name), '<', '{}'.format(input_data)], encoding='utf-8', stdout=subprocess.PIPE, stderr=subprocess.PIPE)
             timer = threading.Timer(1, exec.kill)
             try:
                 timer.start()
                 result, error =  exec.communicate()
             finally:
                 timer.cancel()
-                subprocess.Popen(['rm', '{}'.format(ll_name)])
+                subprocess.Popen(['rm', '{}'.format(ll_name), '{}'.format(input_name)])
                 if result is None and error is None:
-                    return "実行時間が長すぎます。無限ループになっている可能性があります。"
+                    return "実行時間が長すぎます。無限ループか入力待ちの可能性があります。"
             return result
         else:
             return debug_error
 
+    def checkAnswer(a,b):
+        a_cut_index = 1
+        while len(a) > a_cut_index and ord(a[len(a)-a_cut_index]) != 10:
+            a_cut_index += 1
+        if len(a) == a_cut_index:a_cut_index = 0
+
+        b_cut_index = 1
+        while len(b) > b_cut_index and ord(b[len(b)-b_cut_index]) != 10:
+            b_cut_index += 1
+        if len(b) == b_cut_index:b_cut_index = 0
+
+        if a[:len(a)-a_cut_index] == b[:len(b)-b_cut_index]:return True
+        else: return False
+
 
     if request.method == 'POST':
         program = request.POST.get('program_data')
+        type = request.POST.get('type')
         file_name = "".join([random.choice(string.ascii_letters+string.digits) for i in range(10)])
-        result = resultProgram(file_name, program)
-        d = {'result': result}
-
-        if request.user.is_authenticated:
-            # acしたらadminScreenとQuestionModelに
+        if type == 'submit' and request.user.is_authenticated:
             try:
                 user_object = UserModel.objects.get(user=request.user)
                 if user_object.join_group is not None:
                     group_object = user_object.join_group
                     question_object = QuestionModel.objects.get(pk=group_object.focus_question)
+                    input_data = question_object.input
+                    result = resultProgram(program, input_data, file_name)
                     
-                    if question_object.answer == result:
+                    if checkAnswer(question_object.answer, result):
                         channel_name = user_object.join_group.admin_name + '_' + user_object.join_group.group_name + '_adminScreen'
                         async_to_sync(channel_layer.group_send)(
                             channel_name,{
@@ -101,18 +117,30 @@ def editorView(request):
                         question_object.ac_member = question_object.ac_member + user_object.user.username + ','
                         async_to_sync(channel_layer.group_send)(
                             channel_name,{
-                                "type": "send_datas",
+                                "type": "send_data",
                                 "flag": "ac_member",
-                                "message1": user_object.user.username,
-                                "message2": UserModel.objects.filter(join_group=group_object).count()
+                                "message": user_object.user.username
                             }
                         )
+                        result = "正解"
+                    else:
+                        result = "不正解"
                     question_object.submit_member = question_object.submit_member + user_object.user.username + ','
                     question_object.save()
+                else:
+                    result ="グループに参加していません"
             except ObjectDoesNotExist:
-                pass
-    
-        return JsonResponse(d)
+                result = "問題が設定されていません"
+            d = {'result': result}
+            return JsonResponse(d)
+        elif type == 'exec':
+            input_data = request.POST.get('input_data')
+            result = resultProgram(program, input_data, file_name)
+            d = {'result':result}
+            return JsonResponse(d)
+        else:
+            d = {'result': "実行されませんでした"}
+            return JsonResponse(d)
     elif request.user.is_authenticated:
         object = UserModel.objects.get(user=request.user)
         if object.join_group is None:
@@ -149,8 +177,24 @@ def joinGroupView(request):
                             "message": user_object.user.username,     
                         }
                     )
+                    channel_name = joined_group.admin_name + '_' + joined_group.group_name + '_show'
+                    async_to_sync(channel_layer.group_send)(
+                        channel_name,{
+                            "type": "send_data",
+                            "flag": "remove_member",
+                            "message": user_object.user.username
+                        }
+                    )
 
                 channel_name = user_object.join_group.admin_name + '_' + user_object.join_group.group_name + '_adminScreen'
+                async_to_sync(channel_layer.group_send)(
+                    channel_name,{
+                        "type": "send_data",
+                        "flag": "join_member",
+                        "message": user_object.user.username
+                    }
+                )
+                channel_name = user_object.join_group.admin_name + '_' + user_object.join_group.group_name + '_show'
                 async_to_sync(channel_layer.group_send)(
                     channel_name,{
                         "type": "send_data",
@@ -269,8 +313,8 @@ def createdGroupView(request):
 @login_required
 def adminScreenView(request,pk):
     group_object = GroupModel.objects.get(pk=pk)
-
     if group_object.admin != request.user:return redirect('select')
+
     if request.method == 'POST':
         type = request.POST.get('type')
         if 'dissolution' in request.POST:
@@ -280,11 +324,14 @@ def adminScreenView(request,pk):
             question = request.POST.get('question')
             title = request.POST.get('title')
             answer = request.POST.get('answer')
+            input = request.POST.get('input')
+            if input is None: input = ""
             question_object = QuestionModel.objects.create(
                 group = group_object,
                 title = title,
                 question = question,
-                answer = answer
+                answer = answer,
+                input = input
             )
             question_object.save()
             group_object.focus_question = question_object.pk
@@ -306,10 +353,13 @@ def adminScreenView(request,pk):
             question = request.POST.get('question')
             title = request.POST.get('title')
             answer = request.POST.get('answer')
+            input = request.POST.get('input')
+            if input is None:input = ""
             question_object = QuestionModel.objects.get(pk=group_object.focus_question)
             question_object.question = question
             question_object.title = title
             question_object.answer = answer
+            question_object.input = input
             question_object.save()
             d = {'result': True}
 
@@ -325,24 +375,27 @@ def adminScreenView(request,pk):
             return JsonResponse(d)
         elif type == 'ajax-submit-select-question':
             select_question_id = int(request.POST.get('select_question_id'))
-            group_object.focus_question = select_question_id
+            try:
+                select_question = QuestionModel.objects.get(pk=select_question_id)
+            except ObjectDoesNotExist:
+                return JsonResponse({"type":"error","error":"問題が見つかりませんでした"})
+            group_object.focus_question = select_question.pk
             group_object.save()
-            select_question = QuestionModel.objects.get(pk=select_question_id)
             title = select_question.title
             question = select_question.question
             answer = select_question.answer
+            input = select_question.input
             focus_question = str(select_question_id) + ' . ' + title
             ac_members = select_question.ac_member
-            d = {'title':title, 'question':question, 'answer':answer, 'focus_question': focus_question, 'ac_members': ac_members}
+            d = {'type':'correct', 'title':title, 'question':question, 'answer':answer, 'input': input, 'focus_question': focus_question, 'ac_members': ac_members}
             
             channel_name = group_object.admin_name + '_' + group_object.group_name + '_show'
             async_to_sync(channel_layer.group_send)(
                 channel_name,{
-                    "type": "send_data_three",
+                    "type": "send_datas",
                     "flag": "select_question",
                     "message1": select_question.question,
-                    "message2": select_question.ac_member,
-                    "message3": UserModel.objects.filter(join_group=group_object).count()
+                    "message2": select_question.ac_member
                 }
             )
 
@@ -357,6 +410,7 @@ def adminScreenView(request,pk):
         title = ''
         question = ''
         answer = ''
+        input = ''
 
         if focus_q == -1:
             focus_q = "なし"
@@ -365,16 +419,16 @@ def adminScreenView(request,pk):
             title = select_question.title
             question = select_question.question
             answer = select_question.answer
+            input = select_question.input
             focus_q = str(focus_q) + ' . ' + QuestionModel.objects.get(pk=focus_q).title
             
             channel_name = group_object.admin_name + '_' + group_object.group_name + '_show'
             async_to_sync(channel_layer.group_send)(
                 channel_name,{
-                    "type": "send_data_three",
+                    "type": "send_datas",
                     "flag": "select_question",
                     "message1": select_question.question,
-                    "message2": select_question.ac_member,
-                    "message3": UserModel.objects.filter(join_group=group_object).count()
+                    "message2": select_question.ac_member
                 }
             )
         
@@ -386,7 +440,7 @@ def adminScreenView(request,pk):
 
         return render(request, 'adminScreen.html', {'join_password': join_password,'screen_password': screen_password,\
              'group_name': group_name, 'focus_question':focus_q, 'created_questions': created_questions, 'title':title,\
-                  'question':question, 'answer':answer, 'member_list':member_list, 'ac_members': ac_members})
+                  'question':question, 'answer':answer, 'input':input, 'member_list':member_list, 'ac_members': ac_members})
 
 
 @login_required
@@ -411,7 +465,8 @@ def showView(request, pk):
         group_object = GroupModel.objects.get(pk=pk)
     except ObjectDoesNotExist:
         return redirect('select')
-    if request.user != group_object.admin: return redirect('select')
+    if request.user != group_object.admin: 
+        return redirect('select')
     group_name = group_object.group_name
     try: 
         question_object = QuestionModel.objects.get(pk=group_object.focus_question)
@@ -420,10 +475,13 @@ def showView(request, pk):
     
     if request.method == 'POST':
         type = request.POST.get('type')
-        if type == 'ajax-get-ac-parsent':
+        if type == 'ajax_get_member':
             ac_member = question_object.ac_member
-            join_member = UserModel.objects.filter(join_group=group_object).count()
-            d = {'ac_member':ac_member, 'join_member': join_member}
+            join_member = UserModel.objects.filter(join_group=group_object)
+            join_members = []
+            for i in join_member:
+                join_members.append(i.user.username)
+            d = {'ac_member':ac_member, 'join_member': join_members}
             return JsonResponse(d)
     else:
         question = question_object.question
@@ -433,6 +491,8 @@ def showView(request, pk):
 @login_required
 def createSpreadsheetView(request, pk):
     group_object = GroupModel.objects.get(pk=pk)
+    if group_object.admin != request.user:
+        return redirect('select')
     if request.method == 'POST':
         group_object.delete()
         return redirect('select')

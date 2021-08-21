@@ -21,6 +21,7 @@ class QuestionModel(models.Model):
     title = models.CharField(max_length=30)
     question = models.CharField(max_length=200)
     answer = models.TextField()
+    input = models.TextField(default="")
     ac_member = models.TextField(default="")
     submit_member = models.TextField(default="")
 

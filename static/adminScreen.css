@@ -10,6 +10,10 @@ body{
     padding-top: 2rem
 }
 
+#error{
+    color:red;
+    text-align: center;
+}
 
 .group_infomation{
     display: flex;

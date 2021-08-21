@@ -52,7 +52,7 @@
             </div>
         </form>
     </div>
-
+    <div id="error"></div>
     <div class="container">
         <div class="question-contents">
             <div class="content-block">
@@ -67,6 +67,10 @@
                 <div class="show-exp-col"><p class="show">回答</p></div>
                 <textarea id="answer" name="answer" cols="30" rows="5">{{ answer }}</textarea>
             </div>
+            <div class="content-block">
+                <div class="show-exp-col"><p class="show">入力</p></div>
+                <textarea id="input" name="input" cols="30" rows="3">{{ input }}</textarea>
+            </div>
         </div>
         <div class="member-contents">
             <div class="show-exp-col"><p class="show">参加メンバー</p></div>
@@ -74,7 +78,7 @@
         </div>
         <div class="ac-member-contents">
             <div class="show-exp-col"><p class="show">正解メンバー</p></div>
-            <div id="ac-members" class="members"></div>
+            <div id="ac_members" class="members"></div>
             <div hidden id="hidden-ac-members">{{ ac_members }}</div>
         </div>
     </div>

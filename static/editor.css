@@ -116,20 +116,33 @@ body{
 }
 
 #output{
-    width: 70%;
+    width: 50%;
     height: 10rem;
     background-color: black;
-    border-radius: 10px;
     color: white;
+    margin-right: 1rem;
+    overflow-y: scroll;
+}
+
+#input{
+    width: 20%;
+    height: 10rem;
+    background-color: black;
+    color:white;
+    overflow-y: scroll;
+}
+
+.btns{
+    width: 20%;
 }
 
 .btn{
-    width: 10%;
-    height: 3rem;
+    width: 80%;
+    height: 2rem;
     background-color: rgb(37, 209, 157);;
     border-radius: 3px;
     box-shadow: 1px 1px 1px seagreen, -1px -1px 1px seagreen;
-    margin-left: 1rem;
+    margin: 0 1rem 1rem 1rem;
     font-size: 1vw;
     color: white;
     margin-top: auto;

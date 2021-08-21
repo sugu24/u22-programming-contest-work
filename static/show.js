@@ -1,6 +1,16 @@
+var ac_member_set = new Set()
+var join_member_set = new Set()
+var ac_member_no_join_set = new Set()
+
+// %表示
+var showParcent = function(){
+    if (join_member_set.size === 0) document.getElementById('parsent').innerText = 0
+    else document.getElementById('parsent').innerText = Math.min(parseInt(100*ac_member_set.size/join_member_set.size), 80)
+}
+
 // ---------- websocket ---------- //
 var roomName = document.getElementById('username-span').innerText + '_' + document.getElementById('group-name-span').innerText
-var ac_members = new Set()
+
 var dataSocket = new WebSocket(
     'ws://'
     + window.location.host
@@ -11,35 +21,68 @@ var dataSocket = new WebSocket(
 
 dataSocket.onmessage = function(e) {
     const data = JSON.parse(e.data);
-    console.log(data)
     if(data.flag == 'updata_question'){
-        console.log(data.message)
+        // 受け取ったメッセージをquestionに設定
         document.getElementById('question').value = data.message
     }
     else if(data.flag == 'select_question'){
+        // 受け取ったメッセージをquestionに設定
         document.getElementById('question').value = data.message1
+
+        // acしたメンバーをcsv形式で受け取る
         var ac_member_csv = data.message2
-        ac_members = new Set()
+
+        ac_member_set = new Set()
+        ac_member_no_join_set = new Set()
         var member = ""
+        
         for (var i = 0; i < ac_member_csv.length; i++){
             if (ac_member_csv[i] == ','){
-                ac_members.add(member)
+                // 参加しているメンバーならac_memberへ
+                if(join_member_set.has(member))ac_member_set.add(member)
+                else ac_member_no_join_set.add(member)
                 member = ""
             }
             else member += ac_member_csv[i]
         }
-        if (data.message3 === 0){
-            document.getElementById('parsent').innerText = 0
-        }
-        else document.getElementById('parsent').innerText = Math.min(parseFloat(100*ac_members.size/data.message3), 80)
+        // パーセント表示
+        showParcent()
     }
     else if(data.flag == 'next_question'){
+        // 問題設定と初期設定
         document.getElementById('question').value = data.message
+        ac_member_set = new Set()
+        ac_member_no_join_set = new Set()
+
+        // パーセントを0にする
         document.getElementById('parsent').innerText = 0
     }
     else if(data.flag == 'ac_member'){
-        ac_members.add(data.message1)
-        document.getElementById('parsent').innerText = Math.min(parseFloat(100*ac_members.size/data.message2), 80)
+        // acメンバーを踏まえたパーセント表示
+        ac_member_set.add(data.message)
+        showParcent()
+    }
+    else if(data.flag == 'join_member'){
+        join_member_set.add(data.message)
+        
+        // すでにacしているメンバーが参加したらacメンバーに入れる
+        if(ac_member_no_join_set.has(data.message)){
+            ac_member_no_join_set.delete(data.message)
+            ac_member_set.add(data.message)
+        }
+        //パーセント表示
+        showParcent()
+    }
+    else if(data.flag == 'remove_member'){
+        // acメンバーが脱退したらac_member_no_join_setに入れる
+        if(ac_member_set.has(data.message)){
+            ac_member_set.delete(data.message)
+            ac_member_no_join_set.add(data.message)
+        }
+        join_member_set.delete(data.message)
+
+        // パーセント表示
+        showParcent()
     }
 };
 
@@ -84,24 +127,29 @@ $(document).ready(function() {
     $.ajax({
         'url': '',
         'type': 'POST',
-        'data': {'type': 'ajax-get-ac-parsent'},
+        'data': {'type': 'ajax_get_member'},
         'dataType': 'json',
         success: function(response){
             var ac_member_csv = response.ac_member
-            var join_member = response.join_member
-            ac_members = new Set()
+
+            // 初期設定
+            join_member_set = new Set(response.join_member)
+            ac_member_set = new Set()
+            ac_member_no_join_set = new Set()
+            
             var member = ""
             for (var i = 0; i < ac_member_csv.length; i++){
                 if (ac_member_csv[i] == ','){
-                    ac_members.add(member)
+                    // 参加メンバーとacメンバーの積集合
+                    if(join_member_set.has(member))ac_member_set.add(member)
+                    else ac_member_no_join_set.add(member)
                     member = ""
                 }
                 else member += ac_member_csv[i]
             }
-            if (join_member === 0){
-                document.getElementById('parsent').innerText = 0
-            }
-            else document.getElementById('parsent').innerText = Math.min(parseFloat(100*ac_members.size/join_member), 80)
+
+            // パーセント設定
+            showParcent()
         }
     })
 })

@@ -66,7 +66,10 @@ var createSpreadsheet = function(){
         Object.keys(member_dict).forEach(function(key){
             data.push([key, member_dict[key][0], member_dict[key][1]])
         })
-        jexcelData = jexcel(table, {data:data})
+        jexcelData = jexcel(table, {
+            data:data,
+            columns:[{width:100},{width:100},{width:100}]
+        })
         i += 1
         download.hidden = false
         undownload.hidden = false

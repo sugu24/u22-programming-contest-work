@@ -40,12 +40,3 @@ class DataConsumer(WebsocketConsumer):
         flag = event['flag']
         type = event['type']
         self.send(text_data=json.dumps({'type': type, 'flag': flag,'message1':message1, 'message2':message2}))
-    
-
-    def send_data_three(self, event):
-        message1 = event['message1']
-        message2 = event['message2']
-        message3 = event['message3']
-        flag = event['flag']
-        type = event['type']
-        self.send(text_data=json.dumps({'type': type, 'flag': flag,'message1':message1, 'message2':message2, 'message3':message3}))

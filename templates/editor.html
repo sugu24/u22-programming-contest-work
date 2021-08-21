@@ -31,6 +31,7 @@
                     <li><a href="#var-syntax">変数</a></li>
                     <li><a href="#calc-syntax">四則演算</a></li>
                     <li><a href="#print-syntax">出力</a></li>
+                    <li><a href="#input-syntax">入力</a></li>
                     <li><a href="#if-syntax">条件分岐</a></li>
                     <li><a href="#torf-syntax">条件式</a></li>
                     <li><a href="#loop-syntax">繰り返し</a></li>
@@ -93,6 +94,17 @@
                         </span>
                         <br>幅指定は右詰めで指定された幅で出力されます。<br>
                         有効桁数は、指定しないと切り捨て整数で出力され、指定すると小数第n+1桁(n:指定数字)を四捨五入して、表示されます。<br>
+                        <br>
+                        <br>
+                    </div>
+                </div>
+                <div class="syntax" id="input-syntax">
+                    <h3 class="heading">入力</h3>
+                    <div class="contetns">
+                        入力を受け取る際に使用するのが <span class="strong">input</span> です。<br>
+                        <span class="strong">input</span> は <span class="code">input(a,b)</span>のように書き<br>
+                        それぞれの変数に入力値が代入されます。<br>
+                        画面のエディタの下に並んだ黒いスペースの右側が入力値を入力するエリアです。<br>
                         <br>
                         <br>
                     </div>
@@ -312,18 +324,27 @@
     </div>
 </header>
 
-<form id="ajax_submit" action='' method="POST" >{% csrf_token %}
-    <div class="container" id="editor-area">
-        <div id="lines"><div id="num0" class="focusline">1</div></div>
-        <div id="editor" contenteditable="true" spellcheck="false"><div id="line0"><br></div></div>        
-    </div>    
-    
-    <div class="function">
-        <div id="output" contenteditable="false" spellcheck="false"></div>
+
+<div class="container" id="editor-area">
+    <div id="lines"><div id="num0" class="focusline">1</div></div>
+    <div id="editor" contenteditable="true" spellcheck="false"><div id="line0"><br></div></div>        
+</div>    
+
+<div class="function">
+    <textarea readonly name="output" id="output" cols="30" rows="10"></textarea>
+    <textarea name="input" id="input" cols="30" rows="10"></textarea>
+    <div class="btns">
         <button class="btn btn-delete" type="reset" onclick="deleteOutput()">リセット</button>
-        <button class="btn btn-execute" type="submit" name="program_data">実行</button>
+        <form id="ajax_exec" action="" method="POST">{% csrf_token %}
+            <button class="btn btn-execute" type="submit" name="program_data">実行</button>
+        </form>
+        {% if join_group %}
+        <form id="ajax_submit" action="" method="POST">
+            <button class="btn btn-submit" type="submit" name="program_submit">提出</button>
+        </form>
+        {% endif %}
     </div>
-</form>
+</div>
 
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
 <script>

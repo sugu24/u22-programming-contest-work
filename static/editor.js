@@ -435,15 +435,45 @@ var deleteOutput = function(){
 }
 
 // ---------------- submit program ---------------- //
-$('#ajax_submit').on('submit', function(e) {
+var getProgram = function(){
+    var whole_program = "";
+    [].forEach.call(editor.childNodes, function(elm){
+        whole_program += elm.innerText
+        if(elm.innerText != "\n")whole_program += "\n";
+    });
+    return whole_program
+}
+
+
+$('#ajax_exec').on('submit', function(e) {
     e.preventDefault()
+    var program = getProgram()
+    var input = document.getElementById('input').value
     $.ajax({
         'url': '',
         'type': 'POST',
-        'data': {'program_data': $('#editor').text()},
+        'data': {'type': 'exec', 'program_data': program, 'input_data': input},
         'dataType': 'json'
     })
     .done(function(response){
-        document.getElementById("output").innerText += response.result
+        var time_data = new Date()
+        var string = time_data.getHours() + ':' + time_data.getMinutes() + ':' + time_data.getSeconds() + '>\n' + response.result + "\n\n"
+        document.getElementById("output").innerHTML = string + document.getElementById("output").innerHTML
+    })
+})
+
+$('#ajax_submit').on('submit', function(e) {
+    e.preventDefault()
+    var program = getProgram()
+    $.ajax({
+        'url': '',
+        'type': 'POST',
+        'data': {'type': 'submit','program_data': program},
+        'dataType': 'json'
+    })
+    .done(function(response){
+        var time_data = new Date()
+        var string = time_data.getHours() + ':' + time_data.getMinutes() + ':' + time_data.getSeconds() + '>\n' + response.result + "\n\n"
+        document.getElementById("output").innerHTML = string + document.getElementById("output").innerHTML
     })
 })
