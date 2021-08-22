@@ -148,7 +148,7 @@ var createCode = function(txt){
                 if (i == txt.length || txt[i] == ";" || txt[i] == "{")
                     res = '<span class="token token_blue">' + res + token + '</span>'
                 else continue
-            }else if(token == "print" || token == "global" || token == "return")
+            }else if(token == "input" || token == "print" || token == "global" || token == "return")
                 res += '<span class="token token_cyan">' + token + '</span>'
             else
                 res += token
@@ -353,7 +353,6 @@ var paste = function(){
 
         if(row == ind){
             tmp = document.getElementById(id).innerText
-            console.log(tmp, ind, document.getElementById(id).innerText.length)
             var linetext = "";
             var pasteline = null;
             var inserthtml
