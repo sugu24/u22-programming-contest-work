@@ -72,6 +72,7 @@ $('#ajax-submit-next-question').on('submit', function(e) {
     var title = document.getElementById("title").value
     var question = document.getElementById("question").value
     var answer = document.getElementById("answer").value
+    var input = document.getElementById("input").value
     if (title == "" || question == "" || answer == ""){
         document.getElementById('error').innerText = "タイトル、問題文、回答は入力してください"
         return
@@ -84,7 +85,7 @@ $('#ajax-submit-next-question').on('submit', function(e) {
     $.ajax({
         'url': '',
         'type': 'POST',
-        'data': {'type': 'ajax-submit-next-question','title': title, 'question': question, 'answer': answer},
+        'data': {'type': 'ajax-submit-next-question','title': title, 'question': question, 'answer': answer, 'input':input},
         'dataType': 'json',
         success: function(response){
             var option = document.createElement('option')
@@ -104,6 +105,7 @@ $('#ajax-submit-updata').on('submit', function(e) {
     var title = document.getElementById("title").value
     var question = document.getElementById("question").value
     var answer = document.getElementById("answer").value
+    var input = document.getElementById("input").value
     if (title == "" || question == "" || answer == ""){
         codument.getElementById('error').innerText = "タイトル、問題文、回答は入力してください"
         return
@@ -116,7 +118,7 @@ $('#ajax-submit-updata').on('submit', function(e) {
     $.ajax({
         'url': '',
         'type': 'POST',
-        'data': {'type': 'ajax-submit-updata','title': title, 'question': question, 'answer': answer},
+        'data': {'type': 'ajax-submit-updata','title': title, 'question': question, 'answer': answer, 'input':input},
         'dataType': 'json',
         success: function(response){
             console.log('complate')
@@ -147,6 +149,7 @@ $('#ajax-submit-select-question').on('submit', function(e) {
                 document.getElementById('title').value = response.title
                 document.getElementById('question').value = response.question
                 document.getElementById('answer').value = response.answer
+		document.getElementById('input').value = response.input
                 document.getElementById('hidden-ac-members').innerText = response.ac_members
                 document.getElementById('ac_members').innerText = ""
                 ac_member_set = new Set()

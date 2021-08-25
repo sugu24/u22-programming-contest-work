@@ -23,9 +23,9 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 SECRET_KEY = 'django-insecure-2ca@j5yem7!$4pi(2p9vvsv-ms+ld@o^t+6!qw8@azv5@y05&_'
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = True
+DEBUG = False
 
-ALLOWED_HOSTS = []
+ALLOWED_HOSTS = ['167.179.92.146', 'localhost']
 
 
 # Application definition
@@ -79,8 +79,12 @@ WSGI_APPLICATION = 'project.wsgi.application'
 
 DATABASES = {
     'default': {
-        'ENGINE': 'django.db.backends.sqlite3',
-        'NAME': BASE_DIR / 'db.sqlite3',
+        'ENGINE': 'django.db.backends.postgresql_psycopg2',
+        'NAME': 'myproject',
+        'USER': 'myprojectuser',
+        'PASSWORD': 'Sugu0124',
+        'HOST': 'localhost',
+        'PORT': '',
     }
 }
 
@@ -121,6 +125,8 @@ USE_TZ = True
 # Static files (CSS, JavaScript, Images)
 # https://docs.djangoproject.com/en/3.2/howto/static-files/
 
+#STATICFILES_DIRS = [Path.joinpath(BASE_DIR, 'static')]
+STATIC_ROOT = Path.joinpath(BASE_DIR, 'static')
 STATIC_URL = '/static/'
 
 # Default primary key field type
@@ -131,16 +137,12 @@ DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 # login
 LOGIN_URL = '/login/'
 
-# css js 使用
-STATIC_URL = '/staticfile/'
-STATICFILES_DIRS = [Path.joinpath(BASE_DIR, 'static')]
-
 # channels
 ASGI_APPLICATION = 'project.asgi.application'
 CHANNEL_LAYERS = {
     'default': {
         'BACKEND': 'channels_redis.core.RedisChannelLayer',
-        'CONFIG': {"hosts": [('127.0.0.1', 6379)]}, # before run docker port 6379
+        'CONFIG': {"hosts": [('167.179.92.146', 6379)]}, # before run docker port 6379
     },
 }
 # end

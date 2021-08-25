@@ -37,44 +37,6 @@ def selectView(request):
 
 
 def editorView(request):
-    def resultProgram(program, input_data, file_name):
-        gd_name = file_name + ".gd"
-        ll_name = file_name + ".ll"
-        input_name = file_name + '.txt'
-        subprocess.run(['touch', '{}'.format(gd_name)])
-        with open('{}'.format(gd_name), 'w') as fp:
-            fp.write(program)
-        
-        subprocess.run(['touch', '{}'.format(input_name)])
-        with open('{}'.format(input_name), 'w') as fp:
-            fp.write(input_data)
-
-        debug = subprocess.Popen(['dcc', '{}'.format(gd_name), '-o', '{}'.format(ll_name)], encoding='utf-8', stdout=subprocess.PIPE, stderr=subprocess.PIPE)
-        timer = threading.Timer(1, debug.kill)
-        try:
-            timer.start()
-            debug_out, debug_error = debug.communicate()
-        finally:
-            timer.cancel()
-            if debug_out is None and debug_error is None:
-                return "error"
-        
-        subprocess.Popen(['rm', '{}'.format(gd_name)])
-        if len(debug_error) == 0:
-            exec = subprocess.Popen(['lli', '{}'.format(ll_name), '<', '{}'.format(input_data)], encoding='utf-8', stdout=subprocess.PIPE, stderr=subprocess.PIPE)
-            timer = threading.Timer(1, exec.kill)
-            try:
-                timer.start()
-                result, error =  exec.communicate()
-            finally:
-                timer.cancel()
-                subprocess.Popen(['rm', '{}'.format(ll_name), '{}'.format(input_name)])
-                if result is None and error is None:
-                    return "実行時間が長すぎます。無限ループか入力待ちの可能性があります。"
-            return result
-        else:
-            return debug_error
-
     def checkAnswer(a,b):
         a_cut_index = 1
         while len(a) > a_cut_index and ord(a[len(a)-a_cut_index]) != 10:
@@ -101,9 +63,10 @@ def editorView(request):
                     group_object = user_object.join_group
                     question_object = QuestionModel.objects.get(pk=group_object.focus_question)
                     input_data = question_object.input
-                    result = resultProgram(program, input_data, file_name)
-                    
+                    execute = subprocess.Popen(['sudo', 'python3', '/home/suguru/llvm-project/execute/execProgram.py', '{}'.format(program), '{}'.format(input_data), '{}'.format(file_name)], encoding="utf-8", stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+                    result, error = execute.communicate()
                     if checkAnswer(question_object.answer, result):
+                    
                         channel_name = user_object.join_group.admin_name + '_' + user_object.join_group.group_name + '_adminScreen'
                         async_to_sync(channel_layer.group_send)(
                             channel_name,{
@@ -114,7 +77,6 @@ def editorView(request):
                         )
                         
                         channel_name = user_object.join_group.admin_name + '_' + user_object.join_group.group_name + '_show'
-                        question_object.ac_member = question_object.ac_member + user_object.user.username + ','
                         async_to_sync(channel_layer.group_send)(
                             channel_name,{
                                 "type": "send_data",
@@ -122,7 +84,9 @@ def editorView(request):
                                 "message": user_object.user.username
                             }
                         )
+                        
                         result = "正解"
+                        question_object.ac_member = question_object.ac_member + user_object.user.username + ','
                     else:
                         result = "不正解"
                     question_object.submit_member = question_object.submit_member + user_object.user.username + ','
@@ -135,7 +99,8 @@ def editorView(request):
             return JsonResponse(d)
         elif type == 'exec':
             input_data = request.POST.get('input_data')
-            result = resultProgram(program, input_data, file_name)
+            execute = subprocess.Popen(['sudo', 'python3', '/home/suguru/llvm-project/execute/execProgram.py', '{}'.format(program), '{}'.format(input_data), '{}'.format(file_name)], encoding="utf-8", stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+            result, error = execute.communicate()
             d = {'result':result}
             return JsonResponse(d)
         else:
@@ -169,42 +134,46 @@ def joinGroupView(request):
                 user_object.save()
                 
                 if joined_group is not None:
-                    channel_name = joined_group.admin_name + '_' + joined_group.group_name + '_adminScreen'
+                    try:
+                        channel_name = joined_group.admin_name + '_' + joined_group.group_name + '_adminScreen'
+                        async_to_sync(channel_layer.group_send)(
+                            channel_name,{
+                                "type": "send_data",
+                                "flag": "remove_member",
+                                "message": user_object.user.username,     
+                            }
+                        )
+                        channel_name = joined_group.admin_name + '_' + joined_group.group_name + '_show'
+                        async_to_sync(channel_layer.group_send)(
+                            channel_name,{
+                                "type": "send_data",
+                                "flag": "remove_member",
+                                "message": user_object.user.username
+                            }
+                        )
+                    finally:
+                        pass
+                try:
+                    channel_name = user_object.join_group.admin_name + '_' + user_object.join_group.group_name + '_adminScreen'
                     async_to_sync(channel_layer.group_send)(
                         channel_name,{
                             "type": "send_data",
-                            "flag": "remove_member",
-                            "message": user_object.user.username,     
-                        }
-                    )
-                    channel_name = joined_group.admin_name + '_' + joined_group.group_name + '_show'
-                    async_to_sync(channel_layer.group_send)(
-                        channel_name,{
-                            "type": "send_data",
-                            "flag": "remove_member",
+                            "flag": "join_member",
                             "message": user_object.user.username
                         }
                     )
-
-                channel_name = user_object.join_group.admin_name + '_' + user_object.join_group.group_name + '_adminScreen'
-                async_to_sync(channel_layer.group_send)(
-                    channel_name,{
-                        "type": "send_data",
-                        "flag": "join_member",
-                        "message": user_object.user.username
-                    }
-                )
-                channel_name = user_object.join_group.admin_name + '_' + user_object.join_group.group_name + '_show'
-                async_to_sync(channel_layer.group_send)(
-                    channel_name,{
-                        "type": "send_data",
-                        "flag": "join_member",
-                        "message": user_object.user.username
-                    }
-                )
+                    channel_name = user_object.join_group.admin_name + '_' + user_object.join_group.group_name + '_show'
+                    async_to_sync(channel_layer.group_send)(
+                        channel_name,{
+                            "type": "send_data",
+                            "flag": "join_member",
+                            "message": user_object.user.username
+                        }
+                    )
+                
                 # end
-
-                return redirect('editor')
+                finally:
+                    return redirect('editor')
             else:
                 return render(request, 'joinGroup.html', {'error': 'パスワードが一致しません'})
         except ObjectDoesNotExist:
@@ -324,14 +293,14 @@ def adminScreenView(request,pk):
             question = request.POST.get('question')
             title = request.POST.get('title')
             answer = request.POST.get('answer')
-            input = request.POST.get('input')
-            if input is None: input = ""
+            input_data = request.POST.get('input')
+            if input_data is None: input_data = ""
             question_object = QuestionModel.objects.create(
                 group = group_object,
                 title = title,
                 question = question,
                 answer = answer,
-                input = input
+                input = input_data
             )
             question_object.save()
             group_object.focus_question = question_object.pk
@@ -347,7 +316,7 @@ def adminScreenView(request,pk):
                     "message": question_object.question
                 }
             )
-
+            
             return JsonResponse(d)
         elif type == 'ajax-submit-updata':
             question = request.POST.get('question')
