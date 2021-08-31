@@ -86,7 +86,7 @@
                         文字列を表示 : <span class="code">print("表示したい文字列")</span><br>
                         複数の表示 : <span class="code">print(1,a,def(),"文字列")</span><br>
                         改行の表示 : <span class="code">print()</span><br>
-                        途中で改行を入れる表示 : <span class="code">pirnt(a,,a)</span><br>
+                        途中で改行を入れる表示 : <span class="code">pirnt(a,,a,)</span><br>
                         途中で改行を入れる補足説明 . コロン(,)とコロンの間に何も書かない場合と最後にコロンを書いた場合に改行がされる<br>
                         数字の有効桁数・幅指定 : 
                         <span class="code">
@@ -144,7 +144,7 @@
                         ある2つの式・数・変数が指定した条件を満たすかどうかを判定します。<br>
                         使用例 ↓<br>
                         等しいか判定 : <span class="code">a == 1 + b</span><br>
-                        等しくないか判定 <span class="code">a != 1 + b</span>
+			等しくないか判定 <span class="code">a != 1 + b</span><br>
                         未満か判定 : <span class="code">a > b, c < d</span><br>
                         以上か判定 : <span class="code">a >= b, c <= d</span><br>
                         <br>
@@ -154,8 +154,8 @@
                         2つの内1つでも等しいか判定 : <span class="code">a == b or c == d</span><br>
                         <br>
                         難しい話だが、結合力は <span class="strong">or < and</span> であるため<br>
-                        条件式1を満たすか、条件式2と条件式3の2つが共に満たすか判定したい場合は<br>
-                        <span class="code">条件式1 or (条件式2 and 条件式3)</span><br>
+                        条件式1と条件式2の2つのどちらか満たし、条件式3が満たすか判定したい場合は<br>
+                        <span class="code">[条件式1 or 条件式2] and 条件式3</span><br>
                         とする。<br>
                         <br>
                         <br>
@@ -211,9 +211,9 @@
                         <span class="code">
                             a = 1<br>
                             add(b,c){ <br>
-                                print(a,) (aはadd関数内では使えません)<br>
-                                d = b + c <br>
-                                return d <br>
+                            &nbsp;&nbsp;&nbsp;&nbsp;print(a,) (aはadd関数内では使えません)<br>
+                            &nbsp;&nbsp;&nbsp;&nbsp;d = b + c <br>
+                            &nbsp;&nbsp;&nbsp;&nbsp;return d <br>
                             } <br>
                             print(d,) (dはadd関数外では使えません)<br>
                             e = add(1,2)<br>
@@ -232,8 +232,8 @@
                         <span class="code">
                             a = 1<br>
                             add_a(b){ <br>
-                                global a<br>
-                                a += b <br>
+                            &nbsp;&nbsp;&nbsp;&nbsp;global a<br>
+                            &nbsp;&nbsp;&nbsp;&nbsp;a += b <br>
                             } <br>
 			    add_a(2) <br>
                             print(a\\,) (出力:3)<br>

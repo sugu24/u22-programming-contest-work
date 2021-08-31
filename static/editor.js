@@ -7,7 +7,7 @@ var html;
 var index = 1;
 var pos_editor_topleft
 var pos_cursor
-var font_sizes = {"0.375":8, "0.5":8, "0.75":8, "1":8, "1.125":8, "1.2":8, "1.349":8.1481 ,"1.5":8, "1.65":8, "1.875": 8, "2.25":8, "2.625":8, "3":8, "3.75":8, "4.5":8, "6":8, "7.5":8, }
+var font_sizes = {"0.375":8, "0.5":8, "0.75":8, "1":8, "1.125":8, "1.2":8.333, "1.349":8.1481 ,"1.5":8, "1.65":8, "1.875": 8, "2.25":8, "2.625":8, "3":8, "3.75":8, "4.5":8, "6":8, "7.5":8, }
 
 
 var getHtml = function(){
@@ -22,6 +22,7 @@ var getCursorLocate = function(){
     pos_cursor.insertNode(ele)
     pos_cursor = ele.getBoundingClientRect()
     ele.parentElement.removeChild(ele)
+    console.log(pos_editor_topleft.x, pos_cursor.x, pos_cursor.x-pos_editor_topleft.x-5)
     if(pos_cursor.x === 0)return false
     else return true
 };
@@ -203,7 +204,7 @@ var leftOfCursor = function(){
     var left_length = parseInt((pos_cursor.x-pos_editor_topleft.x-5)/font_size)
     var line_prog = document.getElementById(progArr[row-1]).innerText
     var res = 0;
-    
+    console.log(zoom_level)
     for(var i = 0; i < line_prog.length; i++){
         var char = line_prog[i].charCodeAt(0);
         if (charCheck(char)){
