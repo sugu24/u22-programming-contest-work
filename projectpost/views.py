@@ -10,12 +10,10 @@ from .models import GroupModel, UserModel, QuestionModel
 from django.contrib.auth.decorators import login_required
 from django.core.exceptions import ObjectDoesNotExist
 # channel
-from channels.layers import get_channel_layer
 from asgiref.sync import async_to_sync
 # end
 
 # Create your views here.
-channel_layer = get_channel_layer()
 
 def selectView(request):
     if request.method == 'POST':
@@ -39,16 +37,22 @@ def selectView(request):
 def editorView(request):
     def checkAnswer(a,b):
         a_cut_index = 1
-        while len(a) > a_cut_index and ord(a[len(a)-a_cut_index]) != 10:
+        while len(a) > a_cut_index and (ord(a[len(a)-a_cut_index]) == 10 or ord(a[len(a)-a_cut_index]) == 32):
             a_cut_index += 1
-        if len(a) == a_cut_index:a_cut_index = 0
 
         b_cut_index = 1
-        while len(b) > b_cut_index and ord(b[len(b)-b_cut_index]) != 10:
+        while len(b) > b_cut_index and (ord(b[len(b)-b_cut_index]) == 10 or ord(b[len(b)-b_cut_index]) == 32):
             b_cut_index += 1
-        if len(b) == b_cut_index:b_cut_index = 0
-
-        if a[:len(a)-a_cut_index] == b[:len(b)-b_cut_index]:return True
+        
+        a_str = ""
+        for i in a[:len(a)-a_cut_index+1]:
+            a_str += str(i)
+        
+        b_str = ""
+        for i in b[:len(b)-b_cut_index+1]:
+            b_str += str(i)
+        
+        if a_str == b_str:return True
         else: return False
 
 
@@ -66,6 +70,7 @@ def editorView(request):
                     execute = subprocess.Popen(['sudo', 'python3', '/home/suguru/llvm-project/execute/execProgram.py', '{}'.format(program), '{}'.format(input_data), '{}'.format(file_name)], encoding="utf-8", stdout=subprocess.PIPE, stderr=subprocess.PIPE)
                     result, error = execute.communicate()
                     if checkAnswer(question_object.answer, result):
+                        channel_layer = get_channel_layer()
                     
                         channel_name = user_object.join_group.admin_name + '_' + user_object.join_group.group_name + '_adminScreen'
                         async_to_sync(channel_layer.group_send)(
@@ -135,6 +140,7 @@ def joinGroupView(request):
                 
                 if joined_group is not None:
                     try:
+                        channel_layer = get_channel_layer()
                         channel_name = joined_group.admin_name + '_' + joined_group.group_name + '_adminScreen'
                         async_to_sync(channel_layer.group_send)(
                             channel_name,{
@@ -154,6 +160,7 @@ def joinGroupView(request):
                     finally:
                         pass
                 try:
+                    channel_layer = get_channel_layer()
                     channel_name = user_object.join_group.admin_name + '_' + user_object.join_group.group_name + '_adminScreen'
                     async_to_sync(channel_layer.group_send)(
                         channel_name,{
@@ -193,10 +200,19 @@ def selectsignView(request):
 
 
 def signupView(request):
+    def BanUsername(name):
+        for c in name:
+            c = ord(c)
+            if not (97 <= c <= 122 or 65 <= c <= 90 or 48 <= c <= 57 or c == 95):
+                return True
+        return False
+
+
     if request.method == 'POST':
         username_data = request.POST.get('username_data')
         password_data = request.POST.get('password_data')
-        if "," in username_data:return render(request, 'signup.html', {'error': 'ユーザーネームに , は使用できません'})
+        if BanUsername(username_data):
+            return render(request, 'signup.html', {'error': 'ユーザー名は [ a-z A-Z 0-9 _ ] のみで構成してください'})
         try:
             User.objects.create_user(username_data, '', password_data)
             user = authenticate(request, username=username_data, password=password_data)
@@ -240,11 +256,19 @@ def logoutView(request):
 @login_required
 def createGroupView(request):
     def banGroupName(group, groups):
-        if ',' in group:return True
         for i in groups:
             if i.group_name == group:
                 return True
         return False
+    
+
+    def BanGroupname(name):
+        for c in name:
+            c = ord(c)
+            if not (97 <= c <= 122 or 65 <= c <= 90 or 48 <= c <= 57 or c == 95):
+                return True
+        return False
+    
 
     if request.method == 'POST':
         if 'create_group' in request.POST:
@@ -255,8 +279,9 @@ def createGroupView(request):
             object = UserModel.objects.get(user=request.user)
             
             if banGroupName(group_name_data, GroupModel.objects.filter(admin=request.user)):
-                return render(request, 'createGroup.html', {'error': 'グループ名は既に使われているか , が使われています'})
-            
+                return render(request, 'createGroup.html', {'error': 'グループ名は既に使われています'})
+            if BanGroupname(group_name_data):
+                return render(request, 'createGroup.html', {'error': 'グループ名は [ a-z A-Z 0-9 _ ] のみで構成してください'})
             object = GroupModel.objects.create(
                 admin = request.user,
                 admin_name = request.user.username,
@@ -308,6 +333,8 @@ def adminScreenView(request,pk):
             next_question = str(group_object.focus_question) + ' . ' + question_object.title            
             d = {'question': next_question}
             
+            channel_layer = get_channel_layer()
+            
             channel_name = group_object.admin_name + '_' + group_object.group_name + '_show'
             async_to_sync(channel_layer.group_send)(
                 channel_name,{
@@ -331,7 +358,9 @@ def adminScreenView(request,pk):
             question_object.input = input
             question_object.save()
             d = {'result': True}
-
+            
+            channel_layer = get_channel_layer()
+            
             channel_name = group_object.admin_name + '_' + group_object.group_name + '_show'
             async_to_sync(channel_layer.group_send)(
                 channel_name,{
@@ -358,6 +387,7 @@ def adminScreenView(request,pk):
             ac_members = select_question.ac_member
             d = {'type':'correct', 'title':title, 'question':question, 'answer':answer, 'input': input, 'focus_question': focus_question, 'ac_members': ac_members}
             
+            channel_layer = get_channel_layer()
             channel_name = group_object.admin_name + '_' + group_object.group_name + '_show'
             async_to_sync(channel_layer.group_send)(
                 channel_name,{
@@ -391,6 +421,7 @@ def adminScreenView(request,pk):
             input = select_question.input
             focus_q = str(focus_q) + ' . ' + QuestionModel.objects.get(pk=focus_q).title
             
+            channel_layer = get_channel_layer()
             channel_name = group_object.admin_name + '_' + group_object.group_name + '_show'
             async_to_sync(channel_layer.group_send)(
                 channel_name,{

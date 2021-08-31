@@ -81,6 +81,10 @@ $('#ajax-submit-next-question').on('submit', function(e) {
         document.getElementById('error').innerText = "タイトルに . を含まないでください"
         return
     }
+    if (answer.length >= 1001){
+	document.getElementById('error').innerText = "回答は1000文字以下にしてください"
+	return
+    }
     document.getElementById('error').innerText = ""
     $.ajax({
         'url': '',
@@ -107,12 +111,16 @@ $('#ajax-submit-updata').on('submit', function(e) {
     var answer = document.getElementById("answer").value
     var input = document.getElementById("input").value
     if (title == "" || question == "" || answer == ""){
-        codument.getElementById('error').innerText = "タイトル、問題文、回答は入力してください"
+        document.getElementById('error').innerText = "タイトル、問題文、回答は入力してください"
         return
     }
     if(title.indexOf('.') != -1){
         document.getElementById('error').innerText = "タイトルに . を含まないでください"
         return
+    }
+    if (answer.length >= 1001){
+	document.getElementById('error').innerText = "回答は1000文字以下にしてください"
+	return
     }
     document.getElementById('error').innerText = ""
     $.ajax({
@@ -163,8 +171,9 @@ $('#ajax-submit-select-question').on('submit', function(e) {
 // ----------- websocket ----------- //
 var roomName = document.getElementById('username-span').innerText + '_' + document.getElementById('group_name_span').innerText
 
+var ws_scheme = window.location.protocol == "https:" ? "wss" : "ws";
 var dataSocket = new WebSocket(
-    'ws://'
+    ws_scheme + "://"
     + window.location.host
     + '/ws/'
     + roomName + '_adminScreen'
@@ -207,5 +216,5 @@ dataSocket.onmessage = function(e) {
 };
 
 dataSocket.onclose = function(e) {
-    console.error('data socket closed unexpectedly');
+    alert('リアルタイム通信がタイムアウトになりました。\nリロードしてください');
 };

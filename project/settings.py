@@ -25,8 +25,7 @@ SECRET_KEY = 'django-insecure-2ca@j5yem7!$4pi(2p9vvsv-ms+ld@o^t+6!qw8@azv5@y05&_
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = False
 
-ALLOWED_HOSTS = ['167.179.92.146', 'localhost']
-
+ALLOWED_HOSTS = ['greede-service.com', '167.179.92.146', 'localhost']
 
 # Application definition
 
@@ -142,7 +141,7 @@ ASGI_APPLICATION = 'project.asgi.application'
 CHANNEL_LAYERS = {
     'default': {
         'BACKEND': 'channels_redis.core.RedisChannelLayer',
-        'CONFIG': {"hosts": [('167.179.92.146', 6379)]}, # before run docker port 6379
+        'CONFIG': {"hosts": [('127.0.0.1', 6379)]}, # before run docker port 6379
     },
 }
 # end

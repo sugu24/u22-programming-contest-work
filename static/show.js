@@ -10,9 +10,9 @@ var showParcent = function(){
 
 // ---------- websocket ---------- //
 var roomName = document.getElementById('username-span').innerText + '_' + document.getElementById('group-name-span').innerText
-
+var ws_scheme = window.location.protocol == "https:" ? "wss" : "ws";
 var dataSocket = new WebSocket(
-    'ws://'
+    ws_scheme + "://"
     + window.location.host
     + '/ws/'
     + roomName + '_show'
@@ -87,7 +87,7 @@ dataSocket.onmessage = function(e) {
 };
 
 dataSocket.onclose = function(e) {
-    console.error('data socket closed unexpectedly');
+    alert('リアルタイム通信がタイムアウトになりました。\nリロードしてください');
 };
 
 

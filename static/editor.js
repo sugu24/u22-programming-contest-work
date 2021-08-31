@@ -27,11 +27,9 @@ var getCursorLocate = function(){
 };
 
 var getHeight = function(e){
-    // line height = 20px
     bfrrow = row;
     if(getCursorLocate())
         row = Math.min(progArr.length, Math.max(1,Math.floor((pos_cursor.top-pos_editor_topleft.top)/20+1)))
-    //return Math.floor((pos_cursor.top-pos_editor_topleft.top)/20+1);
 }
 
 var noStringLine = function(){
@@ -157,8 +155,8 @@ var createCode = function(txt){
             if(i != txt.length & txt[i] != "&nbsp;") res += txt[i]
             else if(i != txt.length) res += "&nbsp;"
         }
-        else if(txt[i] == "#"){
-            res += token + '<span class="token token_orange">#' + txt.substr(i+1,txt.length-1) + '<\span>'
+        else if(!is_str && txt[i] == "#"){
+            res += token + '<span class="token token_orange">#' + txt.substr(i+1,txt.length-1) + '<span>'
             token = ""
             i = txt.length
         }
@@ -199,7 +197,10 @@ var charCheck = function(char){
 
 var leftOfCursor = function(){
     var zoom_level = window.devicePixelRatio || window.screen.availWidth / document.documentElement.clientWidth * 100;
-    var left_length = parseInt((pos_cursor.x-pos_editor_topleft.x-5)/font_sizes[Math.floor(zoom_level*1000)/1000])
+    var font_size = 0
+    if (font_sizes[Math.floor(zoom_level*1000)/1000]) font_size = font_sizes[Math.floor(zoom_level*1000)/1000]
+    else font_size = 8
+    var left_length = parseInt((pos_cursor.x-pos_editor_topleft.x-5)/font_size)
     var line_prog = document.getElementById(progArr[row-1]).innerText
     var res = 0;
     
@@ -216,20 +217,15 @@ var leftOfCursor = function(){
     return res
 }
 
-var isComment = function(){
-    var prog = document.getElementById(progArr[row-1]).innerText
-    for(var i = leftOfCursor()-2; i >= 0; i--)
-        if(prog[i] == "#") return true
-    return false
-}
-
-var isString = function(){
+var isSkip = function(){
     var prog = document.getElementById(progArr[row-1]).innerText
     var c = 0
     var f = leftOfCursor()
+    var is_comment = false
     for(var i = 0; i < f; i++)
         if (prog[i] == "\"")c += 1
-    if(c % 2 === 1 && prog[f-1] != "\"") return true
+	else if(c % 2 == 0 && prog[i] == "\"") is_comment = true
+    if(c % 2 === 1 && prog[f-1] != "\"" || is_comment) return true
     else return false
 }
 
@@ -243,7 +239,7 @@ var getkeyup = function(e){
     changeLine();
     setlines();
     getHeight(e)
-    if(isComment() || isString()) return
+    if(isSkip()) return
     if(window.getSelection().toString().length === 0 & e.keyCode !== 13){
         var prog = document.getElementById(progArr[row-1])
         var text = prog.innerText;
@@ -361,7 +357,6 @@ var paste = function(){
                 else linetext += tmp[j]
                 if (tmp[j] == "\n" || j == tmp.length-1){
                     linetext = createCode(linetext)
-                    //console.log(linetext)
                     if(pasteline == null){
                         pasteline = document.getElementById(progArr[progArr.length-1])
                         if(linetext.length === 0) linetext = "<br>"
@@ -374,7 +369,6 @@ var paste = function(){
                         pasteline.after(inserthtml)
                         progArr.push(inserthtml.id)
                         if(linetext.length === 0) linetext = "<br>"
-                        //console.log(linetext)
                         document.getElementById(progArr[progArr.length-1]).innerHTML = linetext
                         pasteline = document.getElementById(progArr[progArr.length-1])
                     }
@@ -436,9 +430,11 @@ var deleteOutput = function(){
 // ---------------- submit program ---------------- //
 var getProgram = function(){
     var whole_program = "";
+    var loop = 0;
     [].forEach.call(editor.childNodes, function(elm){
         whole_program += elm.innerText
-        if(elm.innerText != "\n")whole_program += "\n";
+	if(loop != linesArr.length-1 && elm.innerText != "\n")whole_program += "\n";
+	loop += 1
     });
     return whole_program
 }
@@ -456,7 +452,7 @@ $('#ajax_exec').on('submit', function(e) {
     })
     .done(function(response){
         var time_data = new Date()
-        var string = time_data.getHours() + ':' + time_data.getMinutes() + ':' + time_data.getSeconds() + '>\n' + response.result + "\n\n"
+        var string = time_data.getHours() + ':' + time_data.getMinutes() + ':' + time_data.getSeconds() + ' 実行 >\n' + response.result + "\n\n"
         document.getElementById("output").innerHTML = string + document.getElementById("output").innerHTML
     })
 })
@@ -472,7 +468,7 @@ $('#ajax_submit').on('submit', function(e) {
     })
     .done(function(response){
         var time_data = new Date()
-        var string = time_data.getHours() + ':' + time_data.getMinutes() + ':' + time_data.getSeconds() + '>\n' + response.result + "\n\n"
+        var string = time_data.getHours() + ':' + time_data.getMinutes() + ':' + time_data.getSeconds() + ' 提出 >\n' + response.result + "\n\n"
         document.getElementById("output").innerHTML = string + document.getElementById("output").innerHTML
     })
 })

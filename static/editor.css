@@ -115,17 +115,37 @@ body{
     z-index: -10;
 }
 
-#output{
+.output_div{
     width: 50%;
+    height: 11.5rem;
+    margin-right: 1rem;
+}
+
+#output_exp{
+    height: 1rem;
+    margin-bottom: 0.5rem;
+}
+
+#output{
+    width: 100%;
     height: 10rem;
     background-color: black;
     color: white;
-    margin-right: 1rem;
     overflow-y: scroll;
 }
 
-#input{
+.input_div{
     width: 20%;
+    height: 11.5rem;
+}
+
+#input_exp{
+    height: 1rem;
+    margin-bottom: 0.5rem;
+}
+
+#input{
+    width: 100%;
     height: 10rem;
     background-color: black;
     color:white;
